@@ -23,7 +23,7 @@ def generate_result_with_error_handling(conversation: List[dict[str:str]],
         response = generate_response_with_history(conversation, api_key, openai_model, api_url)
 
         try:
-            conversation.append({"role": "system", "content": response})
+            conversation.append({"role": "assistant", "content": response})
             result = extraction_function(response, iteration)
 
             print_conversation(conversation)

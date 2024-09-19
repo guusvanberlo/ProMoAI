@@ -97,7 +97,7 @@ class LLMProcessModelGenerator(object):
 
     def grade_process_model(self):
         conversation = copy(self.conversation)
-        conversation.append({"role": "user", "content": "Could you provide a grade from 1.0 to 10.0 to the provided process model? Please explain briefly your motivations."})
+        conversation.append({"role": "user", "content": "Could you provide a grade from 1.0 (minimum) to 10.0 (maximum) to the provided process model? Please explain briefly your motivations. Please put the overall grade at the beginning of your response."})
         response = openai_connection.generate_response_with_history(conversation, self.api_key, self.openai_model, self.api_url)
         pattern = r'\d+'
         reg_expr = re.compile(pattern)
