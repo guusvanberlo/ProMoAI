@@ -84,6 +84,9 @@ def run_app():
 
     if submit_button:
         if redesign:
+            if uploaded_file is None:
+                st.error(body="No file is selected!", icon="⚠️")
+                return
             try:
                 contents = uploaded_file.read()
                 F = open("temp.bpmn", "wb")
@@ -191,19 +194,22 @@ def run_app():
         except Exception as e:
             st.error(icon='⚠', body=str(e))
 
+
+def add_footer():
     st.markdown("\n\n")
-    
+
     st.markdown(textwrap.dedent("""
-        [![LinkedIn](https://img.shields.io/badge/Humam%20Kourani-gray?logo=linkedin&labelColor=blue)](https://www.linkedin.com/in/humam-kourani-98b342232/)
-        [![Email](https://img.shields.io/badge/Email-gray?logo=minutemailer&logoColor=white&labelColor=green)](mailto:humam.kourani@fit.fraunhofer.de)
-    """), unsafe_allow_html=True)
+            [![LinkedIn](https://img.shields.io/badge/Humam%20Kourani-gray?logo=linkedin&labelColor=blue)](https://www.linkedin.com/in/humam-kourani-98b342232/)
+            [![Email](https://img.shields.io/badge/Email-gray?logo=minutemailer&logoColor=white&labelColor=green)](mailto:humam.kourani@fit.fraunhofer.de)
+        """), unsafe_allow_html=True)
     st.markdown(textwrap.dedent("""
-        [![LinkedIn](https://img.shields.io/badge/Alessandro%20Berti-gray?logo=linkedin&labelColor=blue)](https://www.linkedin.com/in/alessandro-berti-2a483766/)
-        [![Email](https://img.shields.io/badge/Email-gray?logo=minutemailer&logoColor=white&labelColor=green)](mailto:a.berti@pads.rwth-aachen.de)
-    """), unsafe_allow_html=True)
+            [![LinkedIn](https://img.shields.io/badge/Alessandro%20Berti-gray?logo=linkedin&labelColor=blue)](https://www.linkedin.com/in/alessandro-berti-2a483766/)
+            [![Email](https://img.shields.io/badge/Email-gray?logo=minutemailer&logoColor=white&labelColor=green)](mailto:a.berti@pads.rwth-aachen.de)
+        """), unsafe_allow_html=True)
     st.markdown(textwrap.dedent("""
-        [![Paper](https://img.shields.io/badge/ProMoAI:%20Process%20Modeling%20with%20Generative%20AI-gray?logo=adobeacrobatreader&labelColor=red)](https://doi.org/10.24963/ijcai.2024/1014)
-    """), unsafe_allow_html=True)
+            [![Paper](https://img.shields.io/badge/ProMoAI:%20Process%20Modeling%20with%20Generative%20AI-gray?logo=adobeacrobatreader&labelColor=red)](https://doi.org/10.24963/ijcai.2024/1014)
+        """), unsafe_allow_html=True)
+
 
 if __name__ == "__main__":
     st.set_page_config(
@@ -211,3 +217,4 @@ if __name__ == "__main__":
         page_icon="🤖"
     )
     run_app()
+    add_footer()
