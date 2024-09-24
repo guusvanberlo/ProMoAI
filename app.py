@@ -30,6 +30,17 @@ def run_app():
         "Process Model Generator with Generative AI"
     )
 
+    if 'selected_mode' not in st.session_state:
+        st.session_state['selected_mode'] = "Model Generation"
+
+    selected_mode = st.radio("Select Mode:", ["Model Generation", "Model Re-design"], horizontal=True)
+
+    if selected_mode != st.session_state['selected_mode']:
+        st.session_state['selected_mode'] = selected_mode
+        st.session_state['model_gen'] = None
+        st.session_state['feedback'] = []
+        st.experimental_rerun()
+
     with st.form(key='model_gen_form'):
         col1, col2 = st.columns(2)
 
@@ -40,8 +51,15 @@ def run_app():
         with col2:
             api_key = st.text_input("Enter your OpenAI API key:", type="password")
 
-        description = st.text_area("For **process modeling**, enter the process description:")
+        if selected_mode == "Model Generation":
+            redesign = False
+            description = st.text_area("For **process modeling**, enter the process description:")
 
+        else:
+            redesign = True
+            uploaded_file = st.file_uploader("For **process model re-design**, upload a block-structured BPMN 2.0 XML",
+                                             type=["bpmn"],
+                                             help="Block-structured workflow.")
         with st.expander("Show optional settings"):
             api_url = st.text_input(
                 "Enter the API URL (optional):",
@@ -62,14 +80,10 @@ def run_app():
                 value=1
             )
 
-        uploaded_file = st.file_uploader("For **process model re-design**, upload a block-structured BPMN 2.0 XML",
-                                         type=["bpmn"],
-                                         help="Block-structured workflow.")
-
         submit_button = st.form_submit_button(label='Run')
 
     if submit_button:
-        if uploaded_file is not None:
+        if redesign:
             try:
                 contents = uploaded_file.read()
                 F = open("temp.bpmn", "wb")
