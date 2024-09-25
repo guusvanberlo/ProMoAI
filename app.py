@@ -43,19 +43,24 @@ def run_app():
         with col1:
             open_ai_model = st.text_input("Enter the OpenAI model name:", value="gpt-4o-mini",
                                           help="You can check the latest models under: https://openai.com/pricing")
+            api_url = st.text_input(
+                "Enter the API URL (optional):",
+                value="https://api.openai.com/v1",
+                help="Specify the API URL if needed."
+            )
         with col2:
             api_key = st.text_input("Enter your OpenAI API key:", type="password")
-
-        api_url = st.text_input(
-            "Enter the API URL (optional):",
-            value="https://api.openai.com/v1",
-            help="Specify the API URL if needed."
-        )
+            num_candidates = st.number_input(
+                "Number of different candidates to consider (>=1):",
+                min_value=1,
+                value=1
+            )
 
     if 'selected_mode' not in st.session_state:
         st.session_state['selected_mode'] = "Model Generation"
 
-    input_type = st.radio("Select Input Type:", options=[InputType.TEXT.value, InputType.MODEL.value, InputType.DATA.value], horizontal=True)
+    input_type = st.radio("Select Input Type:",
+                          options=[InputType.TEXT.value, InputType.MODEL.value, InputType.DATA.value], horizontal=True)
 
     if input_type != st.session_state['selected_mode']:
         st.session_state['selected_mode'] = input_type
@@ -75,17 +80,13 @@ def run_app():
                     "Enable self-improvement of the generated model",
                     value=False
                 )
-                num_candidates = st.number_input(
-                    "Number of different candidates to consider (>=1):",
-                    min_value=1,
-                    value=1
-                )
             submit_button = st.form_submit_button(label='Run')
             if submit_button:
                 try:
                     if prompt_improvement:
                         description = improve_descr.improve_process_description(description, api_key=api_key,
-                                                                                openai_model=open_ai_model, api_url=api_url)
+                                                                                openai_model=open_ai_model,
+                                                                                api_url=api_url)
 
                     obj = llm_model_generator.initialize(description, api_key, open_ai_model, api_url=api_url,
                                                          n_candidates=num_candidates)
@@ -103,8 +104,8 @@ def run_app():
 
         elif input_type == InputType.DATA.value:
             uploaded_log = st.file_uploader("For **process model discovery**, upload an XES file",
-                                             type=["xes", "xes.gz"],
-                                             help="Event log.")
+                                            type=["xes", "xes.gz"],
+                                            help="Event log.")
             submit_button = st.form_submit_button(label='Run')
             if submit_button:
                 if uploaded_log is None:
@@ -165,7 +166,6 @@ def run_app():
 
         try:
             with col1:
-
                 with st.form(key='feedback_form'):
                     feedback = st.text_area("Feedback:", value="")
                     if st.form_submit_button(label='Update Model'):
@@ -235,20 +235,63 @@ def run_app():
             st.error(icon='⚠', body=str(e))
 
 
-def add_footer():
-    st.markdown("\n\n")
+def footer():
+    style = """
+        <style>
+          .footer-container { 
+              position: fixed;
+              left: 0;
+              bottom: 0;
+              width: 100%;
+              text-align: center;
+              padding: 15px 0;
+              background-color: white;
+              border-top: 2px solid lightgrey;
+              z-index: 100;
+          }
 
-    st.markdown(textwrap.dedent("""
-            [![LinkedIn](https://img.shields.io/badge/Humam%20Kourani-gray?logo=linkedin&labelColor=blue)](https://www.linkedin.com/in/humam-kourani-98b342232/)
-            [![Email](https://img.shields.io/badge/Email-gray?logo=minutemailer&logoColor=white&labelColor=green)](mailto:humam.kourani@fit.fraunhofer.de)
-        """), unsafe_allow_html=True)
-    st.markdown(textwrap.dedent("""
-            [![LinkedIn](https://img.shields.io/badge/Alessandro%20Berti-gray?logo=linkedin&labelColor=blue)](https://www.linkedin.com/in/alessandro-berti-2a483766/)
-            [![Email](https://img.shields.io/badge/Email-gray?logo=minutemailer&logoColor=white&labelColor=green)](mailto:a.berti@pads.rwth-aachen.de)
-        """), unsafe_allow_html=True)
-    st.markdown(textwrap.dedent("""
-            [![Paper](https://img.shields.io/badge/ProMoAI:%20Process%20Modeling%20with%20Generative%20AI-gray?logo=adobeacrobatreader&labelColor=red)](https://doi.org/10.24963/ijcai.2024/1014)
-        """), unsafe_allow_html=True)
+          .footer-text, .header-text {
+              margin: 0;
+              padding: 0;
+          }
+          .footer-links {
+              margin: 0;
+              padding: 0;
+          }
+          .footer-links a {
+              margin: 0 10px;
+              text-decoration: none;
+              color: blue;
+          }
+          .footer-links img {
+              vertical-align: middle;
+          }
+        </style>
+        """
+
+    foot = f"""
+        <div class='footer-container'>
+            <div class='footer-text'>
+                Developed by 
+                <a href="https://www.linkedin.com/in/humam-kourani-98b342232/" target="_blank" style="text-decoration:none;">Humam Kourani</a>
+                and 
+                <a href="https://www.linkedin.com/in/alessandro-berti-2a483766/" target="_blank" style="text-decoration:none;">Alessandro Berti</a>
+                at the
+                <a href="https://www.fit.fraunhofer.de/" target="_blank" style="text-decoration:none;">Fraunhofer Institution for Applied Information Technology</a>.
+            </div>
+            <div class='footer-links'>
+                <a href="https://doi.org/10.24963/ijcai.2024/1014" target="_blank">
+                    <img src="https://img.shields.io/badge/ProMoAI:%20Process%20Modeling%20with%20Generative%20AI-gray?logo=adobeacrobatreader&labelColor=red" alt="ProMoAI Paper">
+                </a>
+                <a href="mailto:humam.kourani@fit.fraunhofer.de?cc=a.berti@pads.rwth-aachen.de;" target="_blank">
+                    <img src="https://img.shields.io/badge/Email-gray?logo=minutemailer&logoColor=white&labelColor=green" alt="Email Humam Kourani">
+                </a>
+            </div>
+        </div>
+        """
+
+    st.markdown(style, unsafe_allow_html=True)
+    st.markdown(foot, unsafe_allow_html=True)
 
 
 if __name__ == "__main__":
@@ -256,5 +299,5 @@ if __name__ == "__main__":
         page_title="ProMoAI",
         page_icon="🤖"
     )
+    footer()
     run_app()
-    add_footer()
