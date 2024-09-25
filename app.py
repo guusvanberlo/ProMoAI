@@ -35,7 +35,7 @@ def run_app():
     st.title('🤖 ProMoAI')
 
     st.subheader(
-        "Process Model Generator with Generative AI"
+        "Process Modeling with Generative AI"
     )
 
     with st.expander("🔧 OpenAI Configuration", expanded=True):
@@ -277,7 +277,7 @@ def footer():
                 and 
                 <a href="https://www.linkedin.com/in/alessandro-berti-2a483766/" target="_blank" style="text-decoration:none;">Alessandro Berti</a>
                 at the
-                <a href="https://www.fit.fraunhofer.de/" target="_blank" style="text-decoration:none;">Fraunhofer Institution for Applied Information Technology</a>.
+                <a href="https://www.fit.fraunhofer.de/" target="_blank" style="text-decoration:none;">Fraunhofer Institute for Applied Information Technology FIT</a>.
             </div>
             <div class='footer-links'>
                 <a href="https://doi.org/10.24963/ijcai.2024/1014" target="_blank">
