@@ -33,7 +33,7 @@ for bpmn_file in os.listdir("bpmn"):
     grade = obj.grade_process_model()
     print("fitness1", fitness_tbr, "\tprecision1", precision_tbr, "\tgrade1", grade, "\tnum_visible1", num_visible)
 
-    obj = llm_model_generator.update(obj, feedback, debug=False)
+    obj = llm_model_generator.update(obj, feedback, debug=False, api_key=api_key, openai_model=openai_model, api_url=api_url)
     grade2 = obj.grade_process_model()
     print("grade2", grade2)
 

@@ -27,7 +27,7 @@ for bpmn_file in os.listdir("bpmn"):
 
     feedback = "These are the process variants of the log, any suggested improvement to the model?\n\n"+pm4py.llm.abstract_variants(log, response_header=False)
 
-    obj = llm_model_generator.update(obj, feedback, debug=False)
+    obj = llm_model_generator.update(obj, feedback, debug=False, api_key=api_key, openai_model=openai_model, api_url=api_url)
     grade2 = obj.grade_process_model()
     print("grade2", grade2)
 

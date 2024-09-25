@@ -1,3 +1,4 @@
+import os
 import subprocess
 
 import streamlit as st
@@ -16,7 +17,14 @@ from pm4py.objects.conversion.wf_net.variants.to_bpmn import apply as pn_to_bpmn
 from pm4py.objects.bpmn.layout import layouter
 from pm4py.objects.bpmn.exporter.variants.etree import get_xml_string
 from utils.general_utils import pt_to_powl_code
-from tempfile import NamedTemporaryFile
+
+from enum import Enum
+
+
+class InputType(Enum):
+    TEXT = "Text"
+    MODEL = "Model"
+    DATA = "Data"
 
 
 def run_model_generator_app():
@@ -30,97 +38,124 @@ def run_app():
         "Process Model Generator with Generative AI"
     )
 
-    if 'selected_mode' not in st.session_state:
-        st.session_state['selected_mode'] = "Model Generation"
-
-    selected_mode = st.radio("Select Mode:", ["Model Generation", "Model Re-design"], horizontal=True)
-
-    if selected_mode != st.session_state['selected_mode']:
-        st.session_state['selected_mode'] = selected_mode
-        st.session_state['model_gen'] = None
-        st.session_state['feedback'] = []
-        st.experimental_rerun()
-
-    with st.form(key='model_gen_form'):
+    with st.expander("🔧 OpenAI Configuration", expanded=True):
         col1, col2 = st.columns(2)
-
         with col1:
             open_ai_model = st.text_input("Enter the OpenAI model name:", value="gpt-4o-mini",
                                           help="You can check the latest models under: https://openai.com/pricing")
-
         with col2:
             api_key = st.text_input("Enter your OpenAI API key:", type="password")
 
-        if selected_mode == "Model Generation":
-            redesign = False
-            description = st.text_area("For **process modeling**, enter the process description:")
+        api_url = st.text_input(
+            "Enter the API URL (optional):",
+            value="https://api.openai.com/v1",
+            help="Specify the API URL if needed."
+        )
 
-        else:
-            redesign = True
+    if 'selected_mode' not in st.session_state:
+        st.session_state['selected_mode'] = "Model Generation"
+
+    input_type = st.radio("Select Input Type:", options=[InputType.TEXT.value, InputType.MODEL.value, InputType.DATA.value], horizontal=True)
+
+    if input_type != st.session_state['selected_mode']:
+        st.session_state['selected_mode'] = input_type
+        st.session_state['model_gen'] = None
+        st.session_state['feedback'] = []
+        st.rerun()
+
+    with st.form(key='model_gen_form'):
+        if input_type == InputType.TEXT.value:
+            description = st.text_area("For **process modeling**, enter the process description:")
+            with st.expander("Show optional settings"):
+                prompt_improvement = st.checkbox(
+                    "Enable self-improvement of the input prompt",
+                    value=False
+                )
+                model_improvement = st.checkbox(
+                    "Enable self-improvement of the generated model",
+                    value=False
+                )
+                num_candidates = st.number_input(
+                    "Number of different candidates to consider (>=1):",
+                    min_value=1,
+                    value=1
+                )
+            submit_button = st.form_submit_button(label='Run')
+            if submit_button:
+                try:
+                    if prompt_improvement:
+                        description = improve_descr.improve_process_description(description, api_key=api_key,
+                                                                                openai_model=open_ai_model, api_url=api_url)
+
+                    obj = llm_model_generator.initialize(description, api_key, open_ai_model, api_url=api_url,
+                                                         n_candidates=num_candidates)
+
+                    if model_improvement:
+                        feedback = "Please improve the process model. For example, typical improvement steps include additional activities, managing a greater number of exceptions, or increasing the concurrency in the execution of the process."
+                        obj = llm_model_generator.update(obj, feedback, n_candidates=num_candidates,
+                                                         api_key=api_key, openai_model=open_ai_model, api_url=api_url)
+
+                    st.session_state['model_gen'] = obj
+                    st.session_state['feedback'] = []
+                except Exception as e:
+                    st.error(body=str(e), icon="⚠️")
+                    return
+
+        elif input_type == InputType.DATA.value:
+            uploaded_log = st.file_uploader("For **process model discovery**, upload an XES file",
+                                             type=["xes", "xes.gz"],
+                                             help="Event log.")
+            submit_button = st.form_submit_button(label='Run')
+            if submit_button:
+                if uploaded_log is None:
+                    st.error(body="No file is selected!", icon="⚠️")
+                    return
+                try:
+                    contents = uploaded_log.read()
+                    temp_file_name = "temp_" + uploaded_log.name
+                    F = open(temp_file_name, "wb")
+                    F.write(contents)
+                    F.close()
+
+                    log = pm4py.read_xes(temp_file_name)
+                    os.remove(temp_file_name)
+                    process_tree = pm4py.discover_process_tree_inductive(log)
+                    powl_code = pt_to_powl_code.recursively_transform_process_tree(process_tree)
+                    obj = llm_model_generator.initialize(None, api_key=api_key,
+                                                         powl_model_code=powl_code, openai_model=open_ai_model,
+                                                         api_url=api_url,
+                                                         debug=False)
+                    st.session_state['model_gen'] = obj
+                    st.session_state['feedback'] = []
+                except Exception as e:
+                    st.error(body=f"Error during discovery: {e}", icon="⚠️")
+                    return
+        elif input_type == InputType.MODEL.value:
             uploaded_file = st.file_uploader("For **process model re-design**, upload a block-structured BPMN 2.0 XML",
                                              type=["bpmn"],
-                                             help="Block-structured workflow.")
-        with st.expander("Show optional settings"):
-            api_url = st.text_input(
-                "Enter the API URL (optional):",
-                value="https://api.openai.com/v1",
-                help="Specify the API URL if needed."
-            )
-            prompt_improvement = st.checkbox(
-                "Enable self-improvement of the input prompt",
-                value=False
-            )
-            model_improvement = st.checkbox(
-                "Enable self-improvement of the generated model",
-                value=False
-            )
-            num_candidates = st.number_input(
-                "Number of different candidates to consider (>=1):",
-                min_value=1,
-                value=1
-            )
-
-        submit_button = st.form_submit_button(label='Run')
-
-    if submit_button:
-        if redesign:
-            if uploaded_file is None:
-                st.error(body="No file is selected!", icon="⚠️")
-                return
-            try:
-                contents = uploaded_file.read()
-                F = open("temp.bpmn", "wb")
-                F.write(contents)
-                F.close()
-
-                bpmn_graph = pm4py.read_bpmn("temp.bpmn")
-                process_tree = pm4py.convert_to_process_tree(bpmn_graph)
-                powl_code = pt_to_powl_code.recursively_transform_process_tree(process_tree)
-                obj = llm_model_generator.initialize(None, api_key=api_key,
-                                                     powl_model_code=powl_code, openai_model=open_ai_model, api_url=api_url,
-                                                     debug=False)
-                st.session_state['model_gen'] = obj
-                st.session_state['feedback'] = []
-            except Exception as e:
-                st.error(body="Please upload a block-structured workflow!", icon="⚠️")
-                return
-        else:
-            try:
-                if prompt_improvement:
-                    description = improve_descr.improve_process_description(description, api_key=api_key, openai_model=open_ai_model, api_url=api_url)
-
-                obj = llm_model_generator.initialize(description, api_key, open_ai_model, api_url=api_url,
-                                               n_candidates=num_candidates)
-
-                if model_improvement:
-                    feedback = "Please improve the process model. For example, typical improvement steps include additional activities, managing a greater number of exceptions, or increasing the concurrency in the execution of the process."
-                    obj = llm_model_generator.update(obj, feedback, n_candidates=num_candidates)
-
-                st.session_state['model_gen'] = obj
-                st.session_state['feedback'] = []
-            except Exception as e:
-                st.error(body=str(e), icon="⚠️")
-                return
+                                             help="Block-structured workflow.",
+                                             )
+            submit_button = st.form_submit_button(label='Upload')
+            if submit_button:
+                if uploaded_file is not None:
+                    try:
+                        contents = uploaded_file.read()
+                        F = open("temp.bpmn", "wb")
+                        F.write(contents)
+                        F.close()
+                        bpmn_graph = pm4py.read_bpmn("temp.bpmn")
+                        os.remove("temp.bpmn")
+                        process_tree = pm4py.convert_to_process_tree(bpmn_graph)
+                        powl_code = pt_to_powl_code.recursively_transform_process_tree(process_tree)
+                        obj = llm_model_generator.initialize(None, api_key=api_key,
+                                                             powl_model_code=powl_code, openai_model=open_ai_model,
+                                                             api_url=api_url,
+                                                             debug=False)
+                        st.session_state['model_gen'] = obj
+                        st.session_state['feedback'] = []
+                    except Exception as e:
+                        st.error(body="Please upload a block-structured model!", icon="⚠️")
+                        return
 
     if 'model_gen' in st.session_state and st.session_state['model_gen']:
 
@@ -135,7 +170,12 @@ def run_app():
                     feedback = st.text_area("Feedback:", value="")
                     if st.form_submit_button(label='Update Model'):
                         try:
-                            st.session_state['model_gen'] = llm_model_generator.update(st.session_state['model_gen'], feedback, n_candidates=num_candidates)
+                            st.session_state['model_gen'] = llm_model_generator.update(st.session_state['model_gen'],
+                                                                                       feedback,
+                                                                                       n_candidates=num_candidates,
+                                                                                       api_key=api_key,
+                                                                                       openai_model=open_ai_model,
+                                                                                       api_url=api_url)
                         except Exception as e:
                             raise Exception("Update failed! " + str(e))
                         st.session_state['feedback'].append(feedback)

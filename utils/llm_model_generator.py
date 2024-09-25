@@ -1,3 +1,5 @@
+from pm4py.objects.powl.obj import POWL
+
 from utils.prompting import create_conversation, update_conversation
 from utils.model_generation.model_generation import generate_model, extract_model_from_response
 from utils.general_utils import openai_connection
@@ -8,8 +10,8 @@ import re
 
 
 class LLMProcessModelGenerator(object):
-    def __init__(self, process_description: Optional[str], api_key: str,
-                 openai_model: str = "gpt-3.5-turbo-0125", api_url: str = "https://api.openai.com/v1", powl_model_code: str = None):
+    def __init__(self, process_description: Optional[str], api_key: str, openai_model: str,
+                 api_url: str = "https://api.openai.com/v1", powl_model_code: str = None, powl_model: POWL = None):
         self.api_url = api_url
         self.api_key = api_key
         self.openai_model = openai_model
@@ -19,6 +21,13 @@ class LLMProcessModelGenerator(object):
                                                                    api_key=self.api_key,
                                                                    openai_model=self.openai_model,
                                                                    api_url=self.api_url)
+        elif powl_model:
+            conversation = list(init_conversation)
+            conversation.append({"role": "assistant",
+                                 "content": "We have the following POWL model already created: "
+                                            "on the user's feedback:\n\n" + str(powl_model)})
+            self.process_model = powl_model
+            self.conversation = conversation
         elif powl_model_code:
             process_model = extract_model_from_response(powl_model_code, 0)
             conversation = list(init_conversation)
@@ -44,7 +53,10 @@ class LLMProcessModelGenerator(object):
         bpmn_model = layouter.apply(bpmn_model)
         return bpmn_model
 
-    def update(self, feedback: str):
+    def update(self, feedback: str, api_key: str, openai_model: str, api_url: str = "https://api.openai.com/v1"):
+        self.api_url = api_url
+        self.api_key = api_key
+        self.openai_model = openai_model
         self.conversation = update_conversation(self.conversation, feedback)
         self.process_model, self.conversation = generate_model(conversation=self.conversation,
                                                                api_key=self.api_key,
@@ -95,7 +107,10 @@ class LLMProcessModelGenerator(object):
                              output_filename=file_path,
                              parameters={"encoding": encoding})
 
-    def grade_process_model(self):
+    def grade_process_model(self, api_key: str, openai_model: str, api_url: str = "https://api.openai.com/v1"):
+        self.api_url = api_url
+        self.api_key = api_key
+        self.openai_model = openai_model
         conversation = copy(self.conversation)
         conversation.append({"role": "user", "content": "Could you provide a grade from 1.0 (minimum) to 10.0 (maximum) to the provided process model? Please explain briefly your motivations. Please put the overall grade at the beginning of your response."})
         response = openai_connection.generate_response_with_history(conversation, self.api_key, self.openai_model, self.api_url)
@@ -107,16 +122,18 @@ class LLMProcessModelGenerator(object):
         return 0.0
 
 
-def initialize(process_description: str, api_key: str,
-                 openai_model: str = "gpt-3.5-turbo-0125", api_url: str = "https://api.openai.com/v1", powl_model_code: str = None, n_candidates: int = 1, debug: bool = False):
+def initialize(process_description: str | None, api_key: str, openai_model: str, api_url: str = "https://api.openai.com/v1",
+               powl_model_code: str = None, powl_model: POWL = None, n_candidates: int = 1, debug: bool = False):
     best_grade = -1.0
     best_cand = None
     exception = ""
     for i in range(n_candidates):
         try:
-            cand = LLMProcessModelGenerator(process_description=process_description, api_key=api_key, openai_model=openai_model, api_url=api_url, powl_model_code=powl_model_code)
+            cand = LLMProcessModelGenerator(process_description=process_description, api_key=api_key,
+                                            openai_model=openai_model, api_url=api_url,
+                                            powl_model_code=powl_model_code, powl_model=powl_model)
             if n_candidates > 1:
-                grade = cand.grade_process_model()
+                grade = cand.grade_process_model(api_key, openai_model, api_url)
                 if grade > best_grade:
                     best_grade = grade
                     best_cand = cand
@@ -131,16 +148,16 @@ def initialize(process_description: str, api_key: str,
     return best_cand
 
 
-def update(generator: LLMProcessModelGenerator, feedback: str, n_candidates: int = 1, debug: bool = False):
+def update(generator: LLMProcessModelGenerator, feedback: str, api_key: str, openai_model: str, api_url: str = "https://api.openai.com/v1", n_candidates: int = 1, debug: bool = False):
     best_grade = -1.0
     best_cand = None
     exception = ""
     for i in range(n_candidates):
         try:
             cand = generator if n_candidates == 1 else deepcopy(generator)
-            cand.update(feedback)
+            cand.update(feedback, api_key, openai_model, api_url)
             if n_candidates > 1:
-                grade = cand.grade_process_model()
+                grade = cand.grade_process_model(api_key, openai_model, api_url)
                 if grade > best_grade:
                     best_grade = grade
                     best_cand = cand

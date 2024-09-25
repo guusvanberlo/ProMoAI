@@ -60,6 +60,7 @@ def generate_response_with_history(conversation_history, api_key, openai_model, 
     :param conversation_history: The conversation history to be included
     :param api_key: OpenAI API key
     :param openai_model: OpenAI model to be used
+    :param api_url: API URL to be used
     :return: The content of the LLM response
     """
     headers = {

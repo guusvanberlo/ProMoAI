@@ -15,7 +15,7 @@ def execute_script():
     obj = llm_model_generator.initialize(None, api_key=api_key,
                                    powl_model_code=powl_code, openai_model=openai_model,
                                          api_url=api_url)
-    obj = llm_model_generator.update(obj, feedback)
+    obj = llm_model_generator.update(obj, feedback, api_key=api_key, openai_model=openai_model, api_url=api_url)
     obj.view_bpmn("svg")
 
 

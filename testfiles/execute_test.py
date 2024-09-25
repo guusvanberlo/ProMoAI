@@ -31,7 +31,7 @@ for fold in folders:
                 if improve_resulting_model == "1":
                     feedback = "Please improve the process model. For example, typical improvement steps include additional activities, managing a greater number of exceptions, or increasing the concurrency in the execution of the process."
 
-                    obj = llm_model_generator.update(obj, feedback, n_candidates=n_candidates, debug=False)
+                    obj = llm_model_generator.update(obj, feedback, n_candidates=n_candidates, debug=False, api_key=api_key, openai_model=openai_model, api_url=api_url)
 
                 powl = obj.process_model
                 net, im, fm = pm4py.convert_to_petri_net(powl)
