@@ -2,7 +2,6 @@ import os
 import subprocess
 
 import streamlit as st
-import textwrap
 import pm4py
 
 from utils import llm_model_generator
@@ -25,6 +24,12 @@ class InputType(Enum):
     TEXT = "Text"
     MODEL = "Model"
     DATA = "Data"
+
+
+class ViewType(Enum):
+    PETRI = "Petri Net"
+    BPMN = "BPMN"
+    POWL = "POWL"
 
 
 def run_model_generator_app():
@@ -133,20 +138,31 @@ def run_app():
                     return
         elif input_type == InputType.MODEL.value:
             uploaded_file = st.file_uploader("For **process model re-design**, upload a block-structured BPMN 2.0 XML",
-                                             type=["bpmn"],
+                                             type=["bpmn", "pnml"],
                                              help="Block-structured workflow.",
                                              )
             submit_button = st.form_submit_button(label='Upload')
             if submit_button:
                 if uploaded_file is not None:
                     try:
-                        contents = uploaded_file.read()
-                        F = open("temp.bpmn", "wb")
-                        F.write(contents)
-                        F.close()
-                        bpmn_graph = pm4py.read_bpmn("temp.bpmn")
-                        os.remove("temp.bpmn")
-                        process_tree = pm4py.convert_to_process_tree(bpmn_graph)
+                        file_extension = uploaded_file.name.split(".")[-1].lower()
+
+                        if file_extension == "bpmn":
+                            contents = uploaded_file.read()
+                            F = open("temp.bpmn", "wb")
+                            F.write(contents)
+                            F.close()
+                            bpmn_graph = pm4py.read_bpmn("temp.bpmn")
+                            os.remove("temp.bpmn")
+                            process_tree = pm4py.convert_to_process_tree(bpmn_graph)
+                        elif file_extension == "pnml":
+                            contents = uploaded_file.read()
+                            F = open("temp.pnml", "wb")
+                            F.write(contents)
+                            F.close()
+                            pn, im, fm = pm4py.read_pnml("temp.pnml")
+                            os.remove("temp.pnml")
+                            process_tree = pm4py.convert_to_process_tree(pn, im, fm)
                         powl_code = pt_to_powl_code.recursively_transform_process_tree(process_tree)
                         obj = llm_model_generator.initialize(None, api_key=api_key,
                                                              powl_model_code=powl_code, openai_model=open_ai_model,
@@ -214,22 +230,25 @@ def run_app():
                         mime="application/xml"
                     )
 
-            view_option = st.selectbox("Select a view:", ["BPMN", "Petri net"])
+            view_option = st.selectbox("Select a view:", [type.value for type in ViewType])
 
             image_format = str("svg").lower()
-            # if view_option == "POWL":
-            #     from pm4py.visualization.powl import visualizer
-            #     visualization = visualizer.apply(powl,
-            #                                      parameters={'format': image_format})
-            if view_option == "Petri net":
+            if view_option == ViewType.POWL.value:
+                from pm4py.visualization.powl import visualizer
+                vis_str = visualizer.apply(powl,
+                                           parameters={'format': image_format})
+
+            elif view_option == ViewType.PETRI.value:
                 visualization = pn_visualizer.apply(pn, im, fm,
                                                     parameters={'format': image_format})
+                vis_str = visualization.pipe(format='svg').decode('utf-8')
             else:  # BPMN
                 visualization = bpmn_visualizer.apply(bpmn,
                                                       parameters={'format': image_format})
+                vis_str = visualization.pipe(format='svg').decode('utf-8')
 
             with st.expander("View Image", expanded=True):
-                st.image(visualization.pipe(format='svg').decode('utf-8'))
+                st.image(vis_str)
 
         except Exception as e:
             st.error(icon='⚠', body=str(e))
