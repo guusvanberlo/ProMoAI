@@ -1,5 +1,5 @@
 from utils import llm_model_generator
-from utils.general_utils import improve_descr
+from utils.general_utils import connection_utils
 
 
 def execute_script():
@@ -11,7 +11,7 @@ def execute_script():
     n_candidates = 2
 
     # improve the process description
-    proc_descr = improve_descr.improve_process_description(proc_descr, api_key, openai_model, api_url=api_url)
+    proc_descr = connection_utils.improve_process_description(proc_descr, api_key, openai_model, api_url=api_url)
     print(proc_descr)
 
     obj = llm_model_generator.initialize(process_description=proc_descr, api_key=api_key, openai_model=openai_model, api_url=api_url, n_candidates=n_candidates, debug=True)

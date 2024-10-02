@@ -2,7 +2,7 @@ import os
 import pm4py
 import json
 from utils import llm_model_generator, shared
-from utils.general_utils import improve_descr
+from utils.general_utils import connection_utils
 
 
 api_url = open("api_url.txt", "r").read().strip()
@@ -23,7 +23,7 @@ for fold in folders:
         if not os.path.exists(output_file):
             try:
                 if improve_initial_prompt == "1":
-                    proc_descr = improve_descr.improve_process_description(proc_descr, api_key, openai_model, api_url=api_url)
+                    proc_descr = connection_utils.improve_process_description(proc_descr, api_key, openai_model, api_url=api_url)
 
                 obj = llm_model_generator.initialize(process_description=proc_descr, api_key=api_key, openai_model=openai_model,
                                                      api_url=api_url, n_candidates=n_candidates, debug=False)

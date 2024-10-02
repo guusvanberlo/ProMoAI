@@ -91,4 +91,4 @@ def generate_response_with_history(conversation_history, api_key, openai_model, 
     try:
         return response["choices"][0]["message"]["content"]
     except Exception as e:
-        raise Exception("Connection to OpenAI failed! This is the response: " + str(response))
+        raise Exception("Connection failed! This is the response: " + str(response))

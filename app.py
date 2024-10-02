@@ -14,8 +14,9 @@ from pm4py.objects.bpmn.exporter.variants.etree import get_xml_string
 
 from utils import llm_model_generator
 from utils.app_utils import InputType, ViewType, footer
-from utils.general_utils import improve_descr
+from utils.general_utils import connection_utils
 from utils.general_utils import pt_to_powl_code
+from utils.prompting.prompt_engineering import model_self_improvement_prompt
 
 
 def run_model_generator_app():
@@ -29,22 +30,25 @@ def run_app():
         "Process Modeling with Generative AI"
     )
 
-    with st.expander("🔧 OpenAI Configuration", expanded=True):
+    with st.expander("🔧 Configuration", expanded=True):
         col1, col2 = st.columns(2)
         with col1:
-            open_ai_model = st.text_input("Enter the OpenAI model name:", value="gpt-4o-mini",
-                                          help="You can check the latest models under: https://openai.com/pricing")
+            open_ai_model = st.text_input("Large language model:", value="gpt-4o-mini",
+                                          help="Please enter the name of a model available through your API key. For OpenAI API keys, check the latest available models at https://openai.com/pricing.")
             api_url = st.text_input(
-                "Enter the API URL (optional):",
+                "API URL:",
                 value="https://api.openai.com/v1",
-                help="Specify the API URL if needed."
+                help="For OpenAI API keys, use https://api.openai.com/v1."
             )
         with col2:
-            api_key = st.text_input("Enter your OpenAI API key:", type="password")
+            api_key = st.text_input("API key:", type="password")
             num_candidates = st.number_input(
-                "Number of different candidates to consider (>=1):",
+                "Number of candidates answers:",
                 min_value=1,
-                value=1
+                value=1,
+                help="If higher than 1, multiple candidate answers will be generated, self-evaluated, "
+                     "and the best one will be returned. This can lead to better results but requires "
+                     "more time and token consumption."
             )
 
     if 'selected_mode' not in st.session_state:
@@ -62,28 +66,32 @@ def run_app():
     with st.form(key='model_gen_form'):
         if input_type == InputType.TEXT.value:
             description = st.text_area("For **process modeling**, enter the process description:")
-            with st.expander("Show optional settings"):
+            with st.expander("Show Optional Settings"):
                 prompt_improvement = st.checkbox(
-                    "Enable self-improvement of the input prompt",
-                    value=False
+                    label="Self-improve the process description",
+                    value=False,
+                    help="If enabled, the language model will self-improve the provided process description to make "
+                         "it richer and more detailed."
                 )
                 model_improvement = st.checkbox(
-                    "Enable self-improvement of the generated model",
-                    value=False
+                    "Self-improve the generated model",
+                    value=False,
+                    help="If enabled, the language model will self-evaluate the generated process model and"
+                         " potentially improve it accordingly."
                 )
             submit_button = st.form_submit_button(label='Run')
             if submit_button:
                 try:
                     if prompt_improvement:
-                        description = improve_descr.improve_process_description(description, api_key=api_key,
-                                                                                openai_model=open_ai_model,
-                                                                                api_url=api_url)
+                        description = connection_utils.improve_process_description(description, api_key=api_key,
+                                                                                   openai_model=open_ai_model,
+                                                                                   api_url=api_url)
 
                     obj = llm_model_generator.initialize(description, api_key, open_ai_model, api_url=api_url,
                                                          n_candidates=num_candidates)
 
                     if model_improvement:
-                        feedback = "Please improve the process model. For example, typical improvement steps include additional activities, managing a greater number of exceptions, or increasing the concurrency in the execution of the process."
+                        feedback = model_self_improvement_prompt()
                         obj = llm_model_generator.update(obj, feedback, n_candidates=num_candidates,
                                                          api_key=api_key, openai_model=open_ai_model, api_url=api_url)
 
@@ -94,7 +102,7 @@ def run_app():
                     return
 
         elif input_type == InputType.DATA.value:
-            uploaded_log = st.file_uploader("For **process model discovery**, upload an XES file",
+            uploaded_log = st.file_uploader("For **process model discovery**, upload an event log:",
                                             type=["xes", "xes.gz"],
                                             help="Event log.")
             submit_button = st.form_submit_button(label='Run')
@@ -123,13 +131,17 @@ def run_app():
                     st.error(body=f"Error during discovery: {e}", icon="⚠️")
                     return
         elif input_type == InputType.MODEL.value:
-            uploaded_file = st.file_uploader("For **process model re-design**, upload a block-structured BPMN 2.0 XML",
-                                             type=["bpmn", "pnml"],
-                                             help="Block-structured workflow.",
-                                             )
+            uploaded_file = st.file_uploader(
+                "For **process model re-design**, upload a block-structured BPMN or Petri net:",
+                type=["bpmn", "pnml"],
+                help="Block-structured workflow.",
+                )
             submit_button = st.form_submit_button(label='Upload')
             if submit_button:
-                if uploaded_file is not None:
+                if uploaded_file is None:
+                    st.error(body="No file is selected!", icon="⚠️")
+                    return
+                else:
                     try:
                         file_extension = uploaded_file.name.split(".")[-1].lower()
 
@@ -149,6 +161,10 @@ def run_app():
                             pn, im, fm = pm4py.read_pnml("temp.pnml")
                             os.remove("temp.pnml")
                             process_tree = pm4py.convert_to_process_tree(pn, im, fm)
+                        else:
+                            st.error(body=f"Unsupported file format {file_extension}!", icon="⚠️")
+                            return
+
                         powl_code = pt_to_powl_code.recursively_transform_process_tree(process_tree)
                         obj = llm_model_generator.initialize(None, api_key=api_key,
                                                              powl_model_code=powl_code, openai_model=open_ai_model,
@@ -237,7 +253,7 @@ def run_app():
                 st.image(vis_str)
 
         except Exception as e:
-            st.error(icon='⚠', body=str(e))
+            st.error(icon='⚠️', body=str(e))
 
 
 if __name__ == "__main__":
