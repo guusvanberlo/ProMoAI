@@ -1,13 +1,9 @@
 import os
 import subprocess
-
 import streamlit as st
+
 import pm4py
-
-from utils import llm_model_generator
-from utils.general_utils import improve_descr
 from pm4py.objects.conversion.powl.variants.to_petri_net import apply as powl_to_pn
-
 from pm4py.util import constants
 from pm4py.objects.petri_net.exporter.variants.pnml import export_petri_as_string
 from pm4py.visualization.petri_net import visualizer as pn_visualizer
@@ -15,21 +11,11 @@ from pm4py.visualization.bpmn import visualizer as bpmn_visualizer
 from pm4py.objects.conversion.wf_net.variants.to_bpmn import apply as pn_to_bpmn
 from pm4py.objects.bpmn.layout import layouter
 from pm4py.objects.bpmn.exporter.variants.etree import get_xml_string
+
+from utils import llm_model_generator
+from utils.app_utils import InputType, ViewType, footer
+from utils.general_utils import improve_descr
 from utils.general_utils import pt_to_powl_code
-
-from enum import Enum
-
-
-class InputType(Enum):
-    TEXT = "Text"
-    MODEL = "Model"
-    DATA = "Data"
-
-
-class ViewType(Enum):
-    PETRI = "Petri Net"
-    BPMN = "BPMN"
-    POWL = "POWL"
 
 
 def run_model_generator_app():
@@ -252,65 +238,6 @@ def run_app():
 
         except Exception as e:
             st.error(icon='⚠', body=str(e))
-
-
-def footer():
-    style = """
-        <style>
-          .footer-container { 
-              position: fixed;
-              left: 0;
-              bottom: 0;
-              width: 100%;
-              text-align: center;
-              padding: 15px 0;
-              background-color: white;
-              border-top: 2px solid lightgrey;
-              z-index: 100;
-          }
-
-          .footer-text, .header-text {
-              margin: 0;
-              padding: 0;
-          }
-          .footer-links {
-              margin: 0;
-              padding: 0;
-          }
-          .footer-links a {
-              margin: 0 10px;
-              text-decoration: none;
-              color: blue;
-          }
-          .footer-links img {
-              vertical-align: middle;
-          }
-        </style>
-        """
-
-    foot = f"""
-        <div class='footer-container'>
-            <div class='footer-text'>
-                Developed by 
-                <a href="https://www.linkedin.com/in/humam-kourani-98b342232/" target="_blank" style="text-decoration:none;">Humam Kourani</a>
-                and 
-                <a href="https://www.linkedin.com/in/alessandro-berti-2a483766/" target="_blank" style="text-decoration:none;">Alessandro Berti</a>
-                at the
-                <a href="https://www.fit.fraunhofer.de/" target="_blank" style="text-decoration:none;">Fraunhofer Institute for Applied Information Technology FIT</a>.
-            </div>
-            <div class='footer-links'>
-                <a href="https://doi.org/10.24963/ijcai.2024/1014" target="_blank">
-                    <img src="https://img.shields.io/badge/ProMoAI:%20Process%20Modeling%20with%20Generative%20AI-gray?logo=adobeacrobatreader&labelColor=red" alt="ProMoAI Paper">
-                </a>
-                <a href="mailto:humam.kourani@fit.fraunhofer.de?cc=a.berti@pads.rwth-aachen.de;" target="_blank">
-                    <img src="https://img.shields.io/badge/Email-gray?logo=minutemailer&logoColor=white&labelColor=green" alt="Email Humam Kourani">
-                </a>
-            </div>
-        </div>
-        """
-
-    st.markdown(style, unsafe_allow_html=True)
-    st.markdown(foot, unsafe_allow_html=True)
 
 
 if __name__ == "__main__":
