@@ -126,17 +126,5 @@ dmypy.json
 .vscode
 .idea
 
-# the following files are ignored
-*.txt
-*/*.txt
-
-temp.bpmn
-
-!testfiles/*.py
-!testfiles/*.txt
-!testfiles/*/*.py
-!testfiles/*/*.txt
-!testfiles/*/*.bpmn
-
-evaluation/testfiles/api*.txt
+evaluation/api*.txt
 !evaluation/testfiles/results/*
