@@ -1,0 +1,246 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<pnml>
+  <net id="imdf_net_1728317296.099665" type="http://www.pnml.org/version-2009/grammar/pnmlcoremodel">
+    <name>
+      <text>imdf_net_1728317296.099665</text>
+    </name>
+    <page id="n0">
+      <place id="p_18">
+        <name>
+          <text>p_18</text>
+        </name>
+      </place>
+      <place id="p_12">
+        <name>
+          <text>p_12</text>
+        </name>
+      </place>
+      <place id="p_20">
+        <name>
+          <text>p_20</text>
+        </name>
+      </place>
+      <place id="p_27">
+        <name>
+          <text>p_27</text>
+        </name>
+      </place>
+      <place id="p_30">
+        <name>
+          <text>p_30</text>
+        </name>
+      </place>
+      <place id="p_54">
+        <name>
+          <text>p_54</text>
+        </name>
+      </place>
+      <place id="source">
+        <name>
+          <text>source</text>
+        </name>
+        <initialMarking>
+          <text>1</text>
+        </initialMarking>
+      </place>
+      <place id="p_10">
+        <name>
+          <text>p_10</text>
+        </name>
+      </place>
+      <place id="p_14">
+        <name>
+          <text>p_14</text>
+        </name>
+      </place>
+      <place id="p_24">
+        <name>
+          <text>p_24</text>
+        </name>
+      </place>
+      <place id="p_32">
+        <name>
+          <text>p_32</text>
+        </name>
+      </place>
+      <place id="p_55">
+        <name>
+          <text>p_55</text>
+        </name>
+      </place>
+      <place id="sink">
+        <name>
+          <text>sink</text>
+        </name>
+      </place>
+      <place id="p_34">
+        <name>
+          <text>p_34</text>
+        </name>
+      </place>
+      <place id="p_8">
+        <name>
+          <text>p_8</text>
+        </name>
+      </place>
+      <place id="p_16">
+        <name>
+          <text>p_16</text>
+        </name>
+      </place>
+      <place id="p_21">
+        <name>
+          <text>p_21</text>
+        </name>
+      </place>
+      <place id="p_26">
+        <name>
+          <text>p_26</text>
+        </name>
+      </place>
+      <place id="p_53">
+        <name>
+          <text>p_53</text>
+        </name>
+      </place>
+      <transition id="57af2876-ab53-454e-8b8f-38fb84eca919">
+        <name>
+          <text>Conduct initial phone interviews</text>
+        </name>
+      </transition>
+      <transition id="a981beca-d46f-45f9-b833-4a22133991de">
+        <name>
+          <text>Conduct in-person interviews</text>
+        </name>
+      </transition>
+      <transition id="skip_27">
+        <name>
+          <text>skip_27</text>
+        </name>
+        <toolspecific tool="ProM" version="6.4" activity="$invisible$" localNodeID="083a1ebb-d891-4ec2-9050-c31726268ead"/>
+      </transition>
+      <transition id="580711f9-d2c2-4070-9582-fab609b76c23">
+        <name>
+          <text>Training</text>
+        </name>
+      </transition>
+      <transition id="90eb7e59-b78a-4e64-8b61-6d37bfd35e13">
+        <name>
+          <text>Begin onboarding process</text>
+        </name>
+      </transition>
+      <transition id="642f2aca-dad6-4381-ad2c-aba9544076f9">
+        <name>
+          <text>Post job description</text>
+        </name>
+      </transition>
+      <transition id="5241e405-4788-4d6b-9767-f0138a523414">
+        <name>
+          <text>Invite candidates for interviews</text>
+        </name>
+      </transition>
+      <transition id="3867c09a-7da0-4f7f-a60b-0e232258fce3">
+        <name>
+          <text>Create job description</text>
+        </name>
+      </transition>
+      <transition id="f3d30be8-924b-450a-9d64-d1d4ab50f8d5">
+        <name>
+          <text>Collect resumes</text>
+        </name>
+      </transition>
+      <transition id="44bb7744-d85e-4ef1-9551-22ead5745b8d">
+        <name>
+          <text>Choose candidate</text>
+        </name>
+      </transition>
+      <transition id="3e14547b-073d-4681-8293-9037126a6fb6">
+        <name>
+          <text>Paperwork</text>
+        </name>
+      </transition>
+      <transition id="81b5a113-812d-4bf9-bcb8-1c57216768a7">
+        <name>
+          <text>Salary negotiations</text>
+        </name>
+      </transition>
+      <transition id="5604ff7e-3910-495f-ab62-daa38ea4e65d">
+        <name>
+          <text>Orientation</text>
+        </name>
+      </transition>
+      <transition id="e1b875e9-f58e-49e9-bae3-f7e98ed7ed19">
+        <name>
+          <text>Identify need for new hire</text>
+        </name>
+      </transition>
+      <transition id="3449d600-b09e-4745-a106-b25590e111a8">
+        <name>
+          <text>Screen resumes</text>
+        </name>
+      </transition>
+      <transition id="d39f1851-cab0-4964-8ba5-1387b607eb77">
+        <name>
+          <text>Extend offer</text>
+        </name>
+      </transition>
+      <transition id="d5f603b0-537d-49b2-8361-7fb843fdba98">
+        <name>
+          <text>Conduct virtual interviews</text>
+        </name>
+      </transition>
+      <transition id="eee6d235-81cf-430e-88cd-6948cfe055a2">
+        <name>
+          <text>Conclude with full integration</text>
+        </name>
+      </transition>
+      <arc id="1195326068224" source="p_26" target="81b5a113-812d-4bf9-bcb8-1c57216768a7"/>
+      <arc id="1195326075904" source="e1b875e9-f58e-49e9-bae3-f7e98ed7ed19" target="p_8"/>
+      <arc id="1195326233648" source="p_55" target="eee6d235-81cf-430e-88cd-6948cfe055a2"/>
+      <arc id="1195326071872" source="p_20" target="a981beca-d46f-45f9-b833-4a22133991de"/>
+      <arc id="1195326067792" source="skip_27" target="p_27"/>
+      <arc id="1195326233168" source="5604ff7e-3910-495f-ab62-daa38ea4e65d" target="p_54"/>
+      <arc id="1195326065776" source="p_30" target="3e14547b-073d-4681-8293-9037126a6fb6"/>
+      <arc id="1195326232688" source="642f2aca-dad6-4381-ad2c-aba9544076f9" target="p_12"/>
+      <arc id="1195326064768" source="p_32" target="5604ff7e-3910-495f-ab62-daa38ea4e65d"/>
+      <arc id="1195326070912" source="580711f9-d2c2-4070-9582-fab609b76c23" target="p_55"/>
+      <arc id="1195326233744" source="p_27" target="90eb7e59-b78a-4e64-8b61-6d37bfd35e13"/>
+      <arc id="1195326077584" source="p_8" target="3867c09a-7da0-4f7f-a60b-0e232258fce3"/>
+      <arc id="1195326074512" source="p_14" target="3449d600-b09e-4745-a106-b25590e111a8"/>
+      <arc id="1195326071440" source="d5f603b0-537d-49b2-8361-7fb843fdba98" target="p_21"/>
+      <arc id="1195326067888" source="p_26" target="skip_27"/>
+      <arc id="1195326233264" source="p_21" target="44bb7744-d85e-4ef1-9551-22ead5745b8d"/>
+      <arc id="1195326227696" source="90eb7e59-b78a-4e64-8b61-6d37bfd35e13" target="p_32"/>
+      <arc id="1195326232304" source="3867c09a-7da0-4f7f-a60b-0e232258fce3" target="p_10"/>
+      <arc id="1195326233360" source="source" target="e1b875e9-f58e-49e9-bae3-f7e98ed7ed19"/>
+      <arc id="1195326071584" source="p_20" target="d5f603b0-537d-49b2-8361-7fb843fdba98"/>
+      <arc id="1195326073648" source="p_16" target="57af2876-ab53-454e-8b8f-38fb84eca919"/>
+      <arc id="1195326232880" source="5241e405-4788-4d6b-9767-f0138a523414" target="p_20"/>
+      <arc id="1195952766784" source="44bb7744-d85e-4ef1-9551-22ead5745b8d" target="p_24"/>
+      <arc id="1195326063952" source="p_34" target="580711f9-d2c2-4070-9582-fab609b76c23"/>
+      <arc id="1195326228320" source="90eb7e59-b78a-4e64-8b61-6d37bfd35e13" target="p_30"/>
+      <arc id="1195326068080" source="81b5a113-812d-4bf9-bcb8-1c57216768a7" target="p_27"/>
+      <arc id="1195326065008" source="57af2876-ab53-454e-8b8f-38fb84eca919" target="p_18"/>
+      <arc id="1195326233456" source="p_53" target="eee6d235-81cf-430e-88cd-6948cfe055a2"/>
+      <arc id="1195326232448" source="90eb7e59-b78a-4e64-8b61-6d37bfd35e13" target="p_34"/>
+      <arc id="1195326077824" source="3449d600-b09e-4745-a106-b25590e111a8" target="p_16"/>
+      <arc id="1195326069136" source="p_24" target="d39f1851-cab0-4964-8ba5-1387b607eb77"/>
+      <arc id="1195326232976" source="d39f1851-cab0-4964-8ba5-1387b607eb77" target="p_26"/>
+      <arc id="1195326071728" source="a981beca-d46f-45f9-b833-4a22133991de" target="p_21"/>
+      <arc id="1195326232496" source="f3d30be8-924b-450a-9d64-d1d4ab50f8d5" target="p_14"/>
+      <arc id="1195326228416" source="eee6d235-81cf-430e-88cd-6948cfe055a2" target="sink"/>
+      <arc id="1195326072784" source="p_18" target="5241e405-4788-4d6b-9767-f0138a523414"/>
+      <arc id="1195325276112" source="3e14547b-073d-4681-8293-9037126a6fb6" target="p_53"/>
+      <arc id="1195326233552" source="p_54" target="eee6d235-81cf-430e-88cd-6948cfe055a2"/>
+      <arc id="1195326078448" source="p_10" target="642f2aca-dad6-4381-ad2c-aba9544076f9"/>
+      <arc id="1195326075376" source="p_12" target="f3d30be8-924b-450a-9d64-d1d4ab50f8d5"/>
+    </page>
+    <finalmarkings>
+      <marking>
+        <place idref="sink">
+          <text>1</text>
+        </place>
+      </marking>
+    </finalmarkings>
+  </net>
+</pnml>

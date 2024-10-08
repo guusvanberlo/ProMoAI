@@ -29,11 +29,8 @@ def add_knowledge():
            " of n >= 2 sub-models. We use the operator loop to model a do-redo loop of 2 POWL models." \
            " The third type of POWL models is defined as a partial" \
            " order over n >= 2 submodels. A partial order is binary relation that is irreflexive, transitive," \
-           " and asymmetry. \n\n"
-
-
-def add_least_to_most():
-    return "Provide the Python code that " \
+           " and asymmetry. " \
+           "Provide the Python code that " \
            "recursively generate a POWL model. Save the final model is the" \
            " variable 'final_model'. Do not try to execute the code, just return it. Assume the class ModelGenerator" \
            " is properly implemented and can be imported using the import statement:" \
@@ -88,7 +85,7 @@ def add_process_description(process_description):
     return "This is the process description: " + process_description
 
 
-def self_evaluation():
+def negative_prompting():
     return "Avoid common mistakes. " \
            "First, ensure that the transitive closure of the generated partial orders" \
            " do not violate irreflexivity. Verify that all optional/skippable and" \
@@ -137,8 +134,7 @@ def add_few_shots():
 def create_model_generation_prompt(process_description: str) -> str:
     prompt = add_role()
     prompt = prompt + add_knowledge()
-    prompt = prompt + add_least_to_most()
-    prompt = prompt + self_evaluation()
+    prompt = prompt + negative_prompting()
     prompt = prompt + add_few_shots()
     prompt = prompt + code_generation()
 

@@ -138,5 +138,5 @@ temp.bpmn
 !testfiles/*/*.txt
 !testfiles/*/*.bpmn
 
-testfiles/api*.txt
-!testfiles/results/*
+evaluation/testfiles/api*.txt
+!evaluation/testfiles/results/*
